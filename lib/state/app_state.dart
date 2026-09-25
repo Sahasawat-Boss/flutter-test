@@ -1,0 +1,96 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// เก็บความคืบหน้าของผู้เรียน (บทที่เรียนจบ, คะแนนควิซ, ธีม)
+/// และบันทึกลงเครื่องด้วย SharedPreferences
+class AppState extends ChangeNotifier {
+  AppState(this._prefs) {
+    _completed.addAll(_prefs.getStringList(_kCompleted) ?? const <String>[]);
+
+    for (final entry in _prefs.getStringList(_kScores) ?? const <String>[]) {
+      final separator = entry.lastIndexOf(':');
+      if (separator <= 0) continue;
+      final score = int.tryParse(entry.substring(separator + 1));
+      if (score != null) _bestScores[entry.substring(0, separator)] = score;
+    }
+
+    final themeIndex = _prefs.getInt(_kTheme) ?? 0;
+    if (themeIndex >= 0 && themeIndex < ThemeMode.values.length) {
+      _themeMode = ThemeMode.values[themeIndex];
+    }
+  }
+
+  static const _kCompleted = 'completed_lessons';
+  static const _kScores = 'quiz_best_scores';
+  static const _kTheme = 'theme_mode';
+
+  final SharedPreferences _prefs;
+  final Set<String> _completed = {};
+  final Map<String, int> _bestScores = {};
+  ThemeMode _themeMode = ThemeMode.system;
+
+  ThemeMode get themeMode => _themeMode;
+
+  bool isCompleted(String lessonId) => _completed.contains(lessonId);
+
+  /// คะแนนสูงสุด (เปอร์เซ็นต์) ของควิซนั้นๆ หรือ null ถ้ายังไม่เคยทำ
+  int? bestScore(String quizId) => _bestScores[quizId];
+
+  int get quizCount => _bestScores.length;
+
+  bool get hasPerfectQuiz => _bestScores.values.any((score) => score == 100);
+
+  void setCompleted(String lessonId, bool completed) {
+    final changed =
+        completed ? _completed.add(lessonId) : _completed.remove(lessonId);
+    if (!changed) return;
+    _prefs.setStringList(_kCompleted, _completed.toList());
+    notifyListeners();
+  }
+
+  /// บันทึกคะแนนถ้าดีกว่าเดิม คืนค่า true เมื่อทำลายสถิติเดิมได้
+  bool recordScore(String quizId, int percent) {
+    final previous = _bestScores[quizId];
+    if (previous != null && previous >= percent) return false;
+    _bestScores[quizId] = percent;
+    _prefs.setStringList(_kScores, [
+      for (final entry in _bestScores.entries) '${entry.key}:${entry.value}',
+    ]);
+    notifyListeners();
+    return previous != null;
+  }
+
+  void setThemeMode(ThemeMode mode) {
+    if (mode == _themeMode) return;
+    _themeMode = mode;
+    _prefs.setInt(_kTheme, mode.index);
+    notifyListeners();
+  }
+
+  Future<void> resetProgress() async {
+    _completed.clear();
+    _bestScores.clear();
+    notifyListeners();
+    await _prefs.remove(_kCompleted);
+    await _prefs.remove(_kScores);
+  }
+}
+
+/// ส่ง [AppState] ลงไปให้ทุก Widget ใน tree
+/// ใช้ `AppScope.of(context)` ใน build() และ `AppScope.read(context)` ใน callback
+class AppScope extends InheritedNotifier<AppState> {
+  const AppScope({super.key, required AppState state, required super.child})
+      : super(notifier: state);
+
+  static AppState of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<AppScope>();
+    assert(scope != null, 'ไม่พบ AppScope ใน widget tree');
+    return scope!.notifier!;
+  }
+
+  static AppState read(BuildContext context) {
+    final scope = context.getInheritedWidgetOfExactType<AppScope>();
+    assert(scope != null, 'ไม่พบ AppScope ใน widget tree');
+    return scope!.notifier!;
+  }
+}
