@@ -14,7 +14,7 @@ import 'lesson_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, required this.onOpenTab});
 
-  /// เปลี่ยนแท็บด้านล่าง (0 = หน้าแรก, 1 = บทเรียน, 2 = ควิซ, 3 = ฉัน)
+  /// เปลี่ยนแท็บด้านล่าง (0 = หน้าแรก, 1 = บทเรียน, 2 = ควิซ, 3 = เกม, 4 = ฉัน)
   final ValueChanged<int> onOpenTab;
 
   @override

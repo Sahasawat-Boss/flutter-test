@@ -47,13 +47,30 @@ void main() {
       expect(AppState(prefs).hasPerfectQuiz, isTrue);
     });
 
+    test('recordGameScore รองรับทั้งเกมที่ยิ่งมากยิ่งดีและยิ่งน้อยยิ่งดี', () {
+      final state = AppState(prefs);
+      expect(state.recordGameScore('true-false', 10), isFalse); // ครั้งแรก
+      expect(state.recordGameScore('true-false', 8), isFalse);
+      expect(state.recordGameScore('true-false', 15), isTrue);
+
+      expect(state.recordGameScore('memory', 12, lowerIsBetter: true), isFalse);
+      expect(state.recordGameScore('memory', 14, lowerIsBetter: true), isFalse);
+      expect(state.recordGameScore('memory', 8, lowerIsBetter: true), isTrue);
+
+      final reloaded = AppState(prefs);
+      expect(reloaded.gameBest('true-false'), 15);
+      expect(reloaded.gameBest('memory'), 8);
+    });
+
     test('resetProgress ล้างข้อมูลทั้งหมด', () async {
       final state = AppState(prefs)
         ..setCompleted('stack', true)
-        ..recordScore('all', 80);
+        ..recordScore('all', 80)
+        ..recordGameScore('memory', 10);
       await state.resetProgress();
       expect(state.isCompleted('stack'), isFalse);
       expect(AppState(prefs).quizCount, 0);
+      expect(AppState(prefs).gameBest('memory'), isNull);
     });
   });
 

@@ -126,7 +126,7 @@ class ProfileScreen extends StatelessWidget {
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.restart_alt_rounded, color: AppColors.danger),
                     title: const Text('รีเซ็ตความคืบหน้า'),
-                    subtitle: const Text('ลบบทเรียนที่เรียนจบและคะแนนควิซทั้งหมด'),
+                    subtitle: const Text('ลบบทเรียนที่เรียนจบ คะแนนควิซ และสถิติเกมทั้งหมด'),
                     onTap: () => _confirmReset(context),
                   ),
                 ],
@@ -154,7 +154,7 @@ class ProfileScreen extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         title: const Text('รีเซ็ตความคืบหน้า?'),
         content: const Text(
-          'บทเรียนที่เรียนจบและคะแนนควิซทั้งหมดจะถูกลบ และกู้คืนไม่ได้',
+          'บทเรียนที่เรียนจบ คะแนนควิซ และสถิติเกมทั้งหมดจะถูกลบ และกู้คืนไม่ได้',
         ),
         actions: [
           TextButton(

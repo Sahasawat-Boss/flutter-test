@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'games_screen.dart';
 import 'home_screen.dart';
 import 'lessons_screen.dart';
 import 'profile_screen.dart';
 import 'quiz_screen.dart';
 
-/// โครงหลักของแอป: แถบเมนูด้านล่าง 4 แท็บ
+/// โครงหลักของแอป: แถบเมนูด้านล่าง 5 แท็บ
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -27,6 +28,7 @@ class _MainShellState extends State<MainShell> {
           HomeScreen(onOpenTab: _openTab),
           const LessonsScreen(),
           const QuizScreen(),
+          const GamesScreen(),
           const ProfileScreen(),
         ],
       ),
@@ -48,6 +50,11 @@ class _MainShellState extends State<MainShell> {
             icon: Icon(Icons.psychology_outlined),
             selectedIcon: Icon(Icons.psychology_rounded),
             label: 'ควิซ',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.sports_esports_outlined),
+            selectedIcon: Icon(Icons.sports_esports_rounded),
+            label: 'เกม',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
